@@ -5,7 +5,6 @@ import android.support.annotation.IdRes;
 import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,9 +22,15 @@ import static org.hamcrest.Matchers.allOf;
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 public class LoginActivityTest {
-
     @Rule
-    public ActivityTestRule<LoginActivity> mActivityTestRule = new ActivityTestRule<>(LoginActivity.class);
+    public ActivityTestRule<LoginActivity> mActivityTestRule = new ActivityTestRule<LoginActivity>(LoginActivity.class) {
+        @Override
+        protected void beforeActivityLaunched() {
+            super.beforeActivityLaunched(); // technically unnecessary, as parent implementation is empty in this case
+            AccountsProviderFactory.replaceAccountsProvider(mockedAccountsProvider);
+        }
+    };
+
 
     public AccountsProvider mockedAccountsProvider = new AccountsProvider() {
         @Override
@@ -33,11 +38,6 @@ public class LoginActivityTest {
             return Collections.singleton(new Account("mocked", "mocked"));
         }
     };
-
-    @Before
-    public void injectFakeResources() {
-        AccountsProviderFactory.replaceAccountsProvider(mockedAccountsProvider);
-    }
 
     @Test
     public void givenSomeLoginButNoPassword_whenLogIsTapped_passwordCantBeBlankErrorAppears() {
