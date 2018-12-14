@@ -9,7 +9,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class LoginActivity extends AppCompatActivity {
-    private final Authenticator authenticator = new Authenticator(new UserDatabase());
+    private final Authenticator authenticator = new Authenticator(AccountsProviderFactory.getAccountsProvider());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
