@@ -1,6 +1,7 @@
 package com.intive.kmorawski.authenticator;
 
 
+import android.support.annotation.IdRes;
 import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
@@ -24,14 +25,45 @@ public class LoginActivityTest {
 
     @Test
     public void givenSomeLoginButNoPassword_whenLogIsTapped_passwordCantBeBlankErrorAppears() {
-        onView(withId(R.id.login_input)).perform(typeText("whatever"));
-        onView(withId(R.id.login)).perform(click());
+        enterLogin("whatever");
 
+        tapLogin();
+
+        expectErrorDisplayed("Password can't be blank");
+    }
+
+    @Test
+    public void givenSomeIncorrectLoginAndPassword_whenLogIsTapped_userNotRegisteredErrorAppears() {
+        enterLogin("inexistent user");
+        enterPassword("some random password");
+
+        tapLogin();
+
+        expectErrorDisplayed("User is not registered");
+    }
+
+    void enterLogin(String login) {
+        typeInto(R.id.login_input, login);
+    }
+
+    void enterPassword(String password) {
+        typeInto(R.id.password_input, password);
+    }
+
+    void typeInto(@IdRes int textViewId, String text) {
+        onView(withId(textViewId)).perform(typeText(text));
+    }
+
+    void tapLogin() {
+        onView(withId(R.id.login)).perform(click());
+    }
+
+    void expectErrorDisplayed(String expectedErrorMessage) {
         onView(withId(R.id.error_message))
                 .check(
                         matches(
                                 allOf(
                                         isDisplayed(),
-                                        withText("Password can't be blank"))));
+                                        withText(expectedErrorMessage))));
     }
 }
