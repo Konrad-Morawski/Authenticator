@@ -5,6 +5,8 @@ import android.support.annotation.IdRes;
 import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
+import android.view.View;
+import org.hamcrest.Matcher;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,6 +20,7 @@ import static android.support.test.espresso.action.ViewActions.typeText;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.*;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.not;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
@@ -31,13 +34,22 @@ public class LoginActivityTest {
         }
     };
 
-
-    public AccountsProvider mockedAccountsProvider = new AccountsProvider() {
+    AccountsProvider mockedAccountsProvider = new AccountsProvider() {
         @Override
         public Collection<Account> getAccounts() {
             return Collections.singleton(new Account("mocked", "mocked"));
         }
     };
+
+    @Test
+    public void givenCorrectLoginAndCorrectPassword_whenLogIsTapped_noErrorAppears() {
+        enterLogin("mocked");
+        enterPassword("mocked");
+
+        tapLogin();
+
+        expectErrorHidden();
+    }
 
     @Test
     public void givenSomeLoginButNoPassword_whenLogIsTapped_passwordCantBeBlankErrorAppears() {
@@ -75,11 +87,16 @@ public class LoginActivityTest {
     }
 
     void expectErrorDisplayed(String expectedErrorMessage) {
-        onView(withId(R.id.error_message))
-                .check(
-                        matches(
-                                allOf(
-                                        isDisplayed(),
-                                        withText(expectedErrorMessage))));
+        ensureErrorMessage(allOf(
+                isDisplayed(),
+                withText(expectedErrorMessage)));
+    }
+
+    void expectErrorHidden() {
+        ensureErrorMessage(not(isDisplayed()));
+    }
+
+    void ensureErrorMessage(Matcher<View> matcher) {
+        onView(withId(R.id.error_message)).check(matches(matcher));
     }
 }
