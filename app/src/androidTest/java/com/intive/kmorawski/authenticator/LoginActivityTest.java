@@ -2,11 +2,15 @@ package com.intive.kmorawski.authenticator;
 
 
 import android.support.annotation.IdRes;
+import android.support.test.espresso.IdlingRegistry;
+import android.support.test.espresso.idling.CountingIdlingResource;
 import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
 import org.hamcrest.Matcher;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,6 +29,8 @@ import static org.hamcrest.Matchers.allOf;
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 public class LoginActivityTest {
+    final CountingIdlingResource countingIdlingResource = new CountingIdlingResource("background");
+
     @Rule
     public ActivityTestRule<LoginActivity> mActivityTestRule = new ActivityTestRule<LoginActivity>(LoginActivity.class) {
         @Override
@@ -40,6 +46,30 @@ public class LoginActivityTest {
             return Collections.singleton(new Account("mocked", "mocked"));
         }
     };
+
+    @Before
+    public void register() {
+        mActivityTestRule.getActivity().injectBackgroundOperationObserver(
+                new BackgroundOperationObserver() {
+                    @Override
+                    public void onStarted() {
+                        countingIdlingResource.increment();
+                    }
+
+                    @Override
+                    public void onFinished() {
+                        countingIdlingResource.decrement();
+                    }
+                }
+        );
+        IdlingRegistry.getInstance().register(countingIdlingResource);
+    }
+
+    @After
+    public void unregister() {
+        mActivityTestRule.getActivity().injectBackgroundOperationObserver(null);
+        IdlingRegistry.getInstance().unregister(countingIdlingResource);
+    }
 
     @Test
     public void givenCorrectLoginAndCorrectPassword_whenLogIsTapped_noErrorAppears() {
