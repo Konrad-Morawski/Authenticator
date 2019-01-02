@@ -10,7 +10,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class LoginActivity extends AppCompatActivity {
@@ -62,11 +61,10 @@ public class LoginActivity extends AppCompatActivity {
 
     private void onAuthenticatedSuccessfully() {
         final Handler handler  = new Handler();
-
-        ProgressBar progressBar = new ProgressBar(this);
+        
         final Dialog dialog = new AlertDialog.Builder(this)
-                .setView(progressBar)
                 .setTitle("Logging in...")
+                .setMessage("It can take a moment")
                 .create();
 
         dialog.show();
