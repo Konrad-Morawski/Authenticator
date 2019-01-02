@@ -17,10 +17,10 @@ import java.util.Collections;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.typeText;
+import static android.support.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.*;
 import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.not;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
@@ -49,6 +49,17 @@ public class LoginActivityTest {
         tapLogin();
 
         expectErrorHidden();
+    }
+
+
+    @Test
+    public void givenCorrectLoginAndCorrectPassword_whenLogIsTapped_promptIsLogged() {
+        enterLogin("mocked");
+        enterPassword("mocked");
+
+        tapLogin();
+
+        ensureLoginPromptDisplayed();
     }
 
     @Test
@@ -93,10 +104,14 @@ public class LoginActivityTest {
     }
 
     void expectErrorHidden() {
-        ensureErrorMessage(not(isDisplayed()));
+        onView(withId(R.id.error_message)).check(doesNotExist());
     }
 
     void ensureErrorMessage(Matcher<View> matcher) {
         onView(withId(R.id.error_message)).check(matches(matcher));
+    }
+
+    void ensureLoginPromptDisplayed() {
+        onView(withId(R.id.prompt)).check(matches(isDisplayed()));
     }
 }
