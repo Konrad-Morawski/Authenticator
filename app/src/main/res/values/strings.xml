@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Authenticator</string>
+    <string name="logged_in_prompt">Hello %s, you\'re logged in!</string>
 </resources>

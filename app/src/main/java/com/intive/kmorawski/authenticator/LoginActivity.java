@@ -1,36 +1,44 @@
 package com.intive.kmorawski.authenticator;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class LoginActivity extends AppCompatActivity {
     private final Authenticator authenticator = new Authenticator(AccountsProviderFactory.getAccountsProvider());
+
+    private EditText loginInput;
+    private EditText passwordInput;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        final EditText login = findViewById(R.id.login_input);
-        final EditText password = findViewById(R.id.password_input);
+        loginInput = findViewById(R.id.login_input);
+        passwordInput = findViewById(R.id.password_input);
 
         findViewById(R.id.login).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AuthenticationResult result = authenticate(login, password);
+                AuthenticationResult result = authenticate();
                 presentResult(result);
             }
         });
     }
 
-    private AuthenticationResult authenticate(EditText login, EditText password) {
-        String enteredLogin = login.getText().toString();
-        String enteredPassword = password.getText().toString();
+    private AuthenticationResult authenticate() {
+        String enteredLogin = loginInput.getText().toString();
+        String enteredPassword = passwordInput.getText().toString();
         return authenticator.authenticate(
                 enteredLogin,
                 enteredPassword);
@@ -53,8 +61,44 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void onAuthenticatedSuccessfully() {
-        Toast.makeText(LoginActivity.this, "Logging in!", Toast.LENGTH_LONG).show();
-        // ...and let the user through to "the app" (had it existed)
+        final Handler handler  = new Handler();
+
+        ProgressBar progressBar = new ProgressBar(this);
+        final Dialog dialog = new AlertDialog.Builder(this)
+                .setView(progressBar)
+                .setTitle("Logging in...")
+                .create();
+
+        dialog.show();
+
+        final Runnable goToMainScreen = new Runnable() {
+            @Override
+            public void run() {
+                if (dialog.isShowing()) {
+                    dialog.dismiss();
+                }
+                openMainActivity();
+            }
+        };
+
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                handler.removeCallbacks(goToMainScreen);
+            }
+        });
+
+        handler.postDelayed(goToMainScreen, 5000);
+    }
+
+    private void openMainActivity() {
+        // this is a bit of a hack obviously; irrelevant to the example
+        String successfulLogin = loginInput.getText().toString();
+        Intent goToMain = new Intent(LoginActivity.this, MainActivity.class)
+                .putExtra(
+                        MainActivity.USER_NAME_KEY,
+                        successfulLogin);
+        startActivity(goToMain);
     }
 
     private void onAuthenticationFailure(AuthenticationResult result, TextView authenticationError) {
