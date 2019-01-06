@@ -3,6 +3,8 @@ package com.intive.kmorawski.authenticator;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -19,6 +21,8 @@ public class LoginActivity extends AppCompatActivity {
         final EditText login = findViewById(R.id.login_input);
         final EditText password = findViewById(R.id.password_input);
 
+        induceArtificialBug();
+
         findViewById(R.id.login).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -26,6 +30,28 @@ public class LoginActivity extends AppCompatActivity {
                 presentResult(result);
             }
         });
+    }
+
+    // just to make monkey tests crash
+    private void induceArtificialBug() {
+        ((TextView) findViewById(R.id.login_input))
+                .addTextChangedListener(
+                        new TextWatcher() {
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                if (s.toString().length() > 2) {
+                                    throw new IllegalStateException("Stupid bug crashes the app once this fairly normal condition occurs");
+                                }
+                            }
+
+                            @Override
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable s) {
+                            }
+                        });
     }
 
     private AuthenticationResult authenticate(EditText login, EditText password) {
