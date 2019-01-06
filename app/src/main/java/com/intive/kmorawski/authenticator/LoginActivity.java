@@ -1,11 +1,13 @@
 package com.intive.kmorawski.authenticator;
 
+import android.app.ActivityManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,6 +22,13 @@ public class LoginActivity extends AppCompatActivity {
 
         final EditText login = findViewById(R.id.login_input);
         final EditText password = findViewById(R.id.password_input);
+
+        // hide the status bar from the evil monkey
+        if (ActivityManager.isUserAMonkey()) {
+            getWindow().setFlags(
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        }
 
         induceArtificialBug();
 
